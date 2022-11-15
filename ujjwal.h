@@ -2,4 +2,8 @@
 
 using namespace std;
 
-string displayName(string);
+void initialiseTerminal(void);
+string getEnvVariable(void);
+void clearScreen(void);
+void initialise(void);
+void exitShell(int);

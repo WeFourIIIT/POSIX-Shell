@@ -1,4 +1,5 @@
 #include <iostream>
+#include <signal.h>
 
 #include "prashant.h"
 #include "priyank.h"
@@ -8,5 +9,7 @@
 using namespace std;
 
 int main() {
+    signal(SIGINT, exitShell);
+    initialise();
     return 0;
 }
