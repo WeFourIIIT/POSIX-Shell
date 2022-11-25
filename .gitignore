@@ -33,3 +33,6 @@
 
 # This project executable
 shell
+
+#VSCode settings
+.vscode

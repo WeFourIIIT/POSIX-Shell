@@ -1,8 +1,10 @@
-#include "prashant.h"
-#include <bits/stdc++.h>
 #include <sys/wait.h>
+#include <unistd.h>
+
+#include "prashant.h"
+#include "ujjwal.h"
+
 using namespace std;
-unordered_map<string, string> aliasUnorderedMap;
 void handlePipes(string cmd)
 {
     string temp = "";
@@ -65,7 +67,7 @@ void handlePipes(string cmd)
                 dup2(fd[1], 1);
             }
             close(fd[0]);
-            execute_given_command(individualCommand[i]);
+            parseInputString(individualCommand[i]);
             exit(EXIT_SUCCESS);
         }
         else if (newProcess < 0)
@@ -99,7 +101,7 @@ void pipeCmd(string cmd)
     checkPipes(cmd);
 }
 
-void aliasHandle(string cmd)
+pair<string, string> aliasHandle(string cmd)
 {
     vector<string> arguments;
     string temp = "";
@@ -122,7 +124,6 @@ void aliasHandle(string cmd)
         }
         else
         {
-
             if (cmd[i] != '=')
             {
                 temp += cmd[i];
@@ -137,10 +138,8 @@ void aliasHandle(string cmd)
     arguments.push_back(temp);
     string key = arguments[1];
     string value = arguments[2];
-    aliasUnorderedMap[key] = value;
-    ofstream file;
-    file.open(".bashrc", std::ios_base::app);
-    file << '\n'
-         << cmd;
-    file.close();
+    pair<string, string> retVal;
+    retVal.first = key;
+    retVal.second = value;
+    return retVal;
 }
