@@ -1,6 +1,9 @@
 #include "priyank.h"
 
 
+
+
+
 // ////////////////////////////
 // /** TRIE BEGINS **/
 
@@ -279,6 +282,26 @@ public:
         // return res; no need here becuase pass by reference
     }
 
+
+    void insertWordInTrie(string word) // priyank  done   moved
+    {
+        insert(word);
+    }
+
+
+    void populateTrie() /// priyank  done    moved
+    {
+        vector<string> basicCommands = {"ls", "echo", "touch", "mkdir", "grep", "pwd", "cd", "cat", "head", "tail", "exit", "history", "clear", "cp"};
+
+        for (int i = 0; i < basicCommands.size(); i++)
+        {
+            // trie->insert(basicCommands[i]);
+            insertWordInTrie(basicCommands[i]);
+        }
+    }
+
+
+
     // END autocorrect
 };
 
@@ -286,25 +309,13 @@ Trie *trie = new Trie();
 
 // Trie *h_trie = new Trie();
 
-void insertWordInTrie(string word) // priyank  done   moved
-{
-    trie->insert(word);
-}
 
-void populateTrie() /// priyank  done    moved
-{
-    vector<string> basicCommands = {"ls", "echo", "touch", "mkdir", "grep", "pwd", "cd", "cat", "head", "tail", "exit", "history", "clear", "cp"};
-
-    for (int i = 0; i < basicCommands.size(); i++)
-    {
-        // trie->insert(basicCommands[i]);
-        insertWordInTrie(basicCommands[i]);
-    }
-}
 
 // /** TRIE ENDS **/
 
 // ///////////////////////////////////
+
+
 
 
 
