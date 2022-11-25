@@ -1,13 +1,13 @@
+#include <unistd.h>
 #include "rishabh.h"
-
 void alarmMessage(vector<string> mymsg, int sec) // if (args[0] == "alarm") alarmMessage(args, stoi(args[1]));
 {
     int mysize;
     mysize = mymsg.size();
     if (mysize < 3)
     {
-        cout << "Invalid alarm";
-        cout << endl;
+        cout<<endl<<"Invalid alarm";
+        cout<<endl;
         return;
     }
     else
@@ -31,6 +31,8 @@ void alarmMessage(vector<string> mymsg, int sec) // if (args[0] == "alarm") alar
             cout<<sms;
             cout<<endl;
             exit(EXIT_SUCCESS);
+        }else{
+            return;
         }
     }
 }

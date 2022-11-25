@@ -281,7 +281,7 @@ void parseInputString(string command) {
         // I've not implemented the jobs command
     }else if(splittedCommand[0] == "quit") {
         // Can save the history.. Look into it
-        exit(0);
+        exit(EXIT_SUCCESS);
     }else if(splittedCommand[0] == "history") {
         // print_history();
     }else if(splittedCommand[0] == "clear") {
@@ -290,6 +290,7 @@ void parseInputString(string command) {
         exportVariable(splittedCommand);
     }else if(splittedCommand[0] == "alarm") {
         // Rishabh has to implement this
+        alarmMessage(splittedCommand, stoi(splittedCommand[1]));
     }else if(splittedCommand[0] == "open") {
         // Rishabh has to implement this
         string filePath = splittedCommand[1];
