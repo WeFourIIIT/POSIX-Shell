@@ -313,7 +313,13 @@ void parseInputString(string command) {
             handleBasicCommands(aliasUnorderedMap[splittedCommand[0]]);
         }else{
             // cat, ls, mkdir, touch, nano, cd, pwd, whoami
-            handleBasicCommands(command);
+            if(splittedCommand[0] == "cd") {
+                if(chdir(splittedCommand[1].c_str()) != 0) {
+                    cout<<endl<<"Invalid path"<<endl;
+                }
+            }else{
+                handleBasicCommands(command);
+            }
         }
     }
 }
