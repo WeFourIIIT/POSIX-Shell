@@ -1,4 +1,4 @@
-#include <iostream>
+#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -7,3 +7,4 @@ string getEnvVariable(void);
 void clearScreen(void);
 void initialise(void);
 void exitShell(int);
+void parseInputString(string);

@@ -1,4 +1,3 @@
-#include <bits/stdc++.h>
 #include <termios.h>
 #include <unordered_map>
 #include <unistd.h>
@@ -7,11 +6,13 @@
 
 #include "ujjwal.h"
 #include "rishabh.h"
+#include "prashant.h"
 
 using namespace std;
 
 unordered_map<string, string> envVars;
 unordered_map<string, string> localEnvVars;
+unordered_map<string, string> aliasUnorderedMap;
 struct termios oldTermios, newTermios;
 vector<string> commands;
 
@@ -105,8 +106,6 @@ void handleRedirection(string command, string redirectionType) {
         return;
     }
 }
-
-void handlePiping(vector<string> &command) {}
 
 void handleBackgroundExec() {}
 
@@ -243,7 +242,7 @@ void parseInputString(string command) {
         }
     }else if(command.find('|') != string::npos) {
         // Handle | piping
-        handlePiping(splittedCommand);
+        pipeCmd(command);
     }else if(command.back() == '&') {
         // Handle background command execution
         handleBackgroundExec();
@@ -297,6 +296,8 @@ void parseInputString(string command) {
         fileOpen(filePath.c_str());
     }else if(splittedCommand[0] == "alias") {
         // Prashant has to implement this
+        pair<string, string> alias = aliasHandle(command);
+        aliasUnorderedMap[alias.first] = alias.second;
     }else if(splittedCommand[0] == "fg") {
         // Ujjwal has to do this
     }else if(splittedCommand[0] == "setenv") {
@@ -308,8 +309,12 @@ void parseInputString(string command) {
         // unsetenv COLLEGE
         unsetEnvironment(splittedCommand[1]);
     }else{
-        // cat, ls, mkdir, touch, nano, cd, pwd, whoami
-        handleBasicCommands(command);
+        if(aliasUnorderedMap.find(splittedCommand[0]) != aliasUnorderedMap.end()) {
+            handleBasicCommands(aliasUnorderedMap[splittedCommand[0]]);
+        }else{
+            // cat, ls, mkdir, touch, nano, cd, pwd, whoami
+            handleBasicCommands(command);
+        }
     }
 }
 
