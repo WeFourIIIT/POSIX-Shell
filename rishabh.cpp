@@ -1,23 +1,26 @@
-#include <bits/stdc++.h>
-#include <unistd.h>
 #include "rishabh.h"
 
-using namespace std;
-
-void alarmMessage(vector<string> mymsg, int sec) {
+void alarmMessage(vector<string> mymsg, int sec) // if (args[0] == "alarm") alarmMessage(args, stoi(args[1]));
+{
     int mysize;
     mysize = mymsg.size();
-    if (mysize < 3) {
-        cout<<"Invalid alarm";
-        cout<<endl;
+    if (mysize < 3)
+    {
+        cout << "Invalid alarm";
+        cout << endl;
         return;
     }
-    else{
+    else
+    {
+
         string sms;
         sms = "";
+
         int i;
         i = 2;
-        while (i < mysize) {
+
+        while (i < mysize)
+        {
             sms = sms + mymsg[i];
             sms = sms + " ";
             i = i + 1;
