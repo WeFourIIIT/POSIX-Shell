@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 
 #include "ujjwal.h"
+#include "rishabh.h"
 
 using namespace std;
 
@@ -232,8 +233,6 @@ void handleBasicCommands(string args) {
 }
 
 void parseInputString(string command) {
-    // cout<<endl<<s<<endl;
-    // Remember to end each and every cout statement with endl
     vector<string> splittedCommand = splitCommand(command, " ");
     if(command.find('>') != string::npos) {
         // Handle both >> and >
@@ -251,7 +250,7 @@ void parseInputString(string command) {
     }else if(splittedCommand[0] == "echo") {
         if(splittedCommand.size() == 1) {
             // If no parameter is provided to echo the simply print a newline
-            cout<<endl;
+            return;
         }else if(splittedCommand[1] == "$$") {
             // $$ is the PID of the current process
             print(to_string(getpid()));
@@ -273,7 +272,7 @@ void parseInputString(string command) {
                     return;
                 }
             }
-            cout<<endl;
+            return;
         }
         // else if() {Implement redirection in echo}
         else {
@@ -281,11 +280,6 @@ void parseInputString(string command) {
         }
     }else if(splittedCommand[0] == "jobs") {
         // I've not implemented the jobs command
-    }else if(splittedCommand[0] == "pwd") {
-        // Prints the current working directory
-        cout<<endl<<getCurrentWorkingDirectory()<<endl;
-    }else if(splittedCommand[0] == "cd") {
-        changeDirectory(splittedCommand);
     }else if(splittedCommand[0] == "quit") {
         // Can save the history.. Look into it
         exit(0);
@@ -299,6 +293,8 @@ void parseInputString(string command) {
         // Rishabh has to implement this
     }else if(splittedCommand[0] == "open") {
         // Rishabh has to implement this
+        string filePath = splittedCommand[1];
+        fileOpen(filePath.c_str());
     }else if(splittedCommand[0] == "alias") {
         // Prashant has to implement this
     }else if(splittedCommand[0] == "fg") {
@@ -311,7 +307,8 @@ void parseInputString(string command) {
         // Format would be like
         // unsetenv COLLEGE
         unsetEnvironment(splittedCommand[1]);
-    }else if(splittedCommand[0] == "cat" || splittedCommand[0] == "ls" || splittedCommand[0] == "mkdir" || splittedCommand[0] == "touch" || splittedCommand[0] == "nano") {
+    }else{
+        // cat, ls, mkdir, touch, nano, cd, pwd, whoami
         handleBasicCommands(command);
     }
 }
@@ -319,13 +316,22 @@ void parseInputString(string command) {
 void takeInput() {
     string s;
     char ch;
-    int commandIdx = -1;
+    // int commandIdx = -1;
     while(true) {
-        cout<<getEnvVariable("PS1");
+        string prompt = getEnvVariable("PS1");
+        if(prompt.size() == 0) {
+            char buffer[256];
+            gethostname(buffer, sizeof(buffer));
+            string host = buffer;
+            getlogin_r(buffer, sizeof(buffer));
+            string user = buffer;
+            string separator = geteuid() ? "@" : "#";
+            prompt = user + separator + host + " > ";
+        }
+        cout<<prompt;
         s = "";
         while((ch = cin.get()) && ch != 10) {
             cout<<ch;
-
             // If backspace key is pressed
             if(ch == 127) {
                 if(s.size()){
@@ -339,16 +345,16 @@ void takeInput() {
                 ch = cin.get();
                 if(ch == 'A') {
                     // Up key was pressed
-                    if(commandIdx >= 0) {
-                        s = commands[commandIdx--];
-                        cout<<s;
-                    }
+                    // if(commandIdx >= 0) {
+                    //     s = commands[commandIdx--];
+                    //     cout<<s;
+                    // }
                 }else if(ch == 'B') {
                     // Down key was pressed
-                    if(commandIdx < commands.size()) {
-                        s = commands[commandIdx++];
-                        cout<<" "<<s;
-                    }
+                    // if(commandIdx < commands.size()) {
+                    //     s = commands[commandIdx++];
+                    //     cout<<" "<<s;
+                    // }
                 }else if(ch == 'C') {
                     // Right key was pressed
                 }else if(ch == 'D') {
@@ -361,13 +367,9 @@ void takeInput() {
         if(ch == 10){
             // Enter key was pressed
             if(s != "") {
-                commands.push_back(s);
-                commandIdx = commands.size() - 1;
-            }else{
-                cout<<endl;
+                parseInputString(s);
             }
-            parseInputString(s);
-            // exit(0);
+            cout<<endl;
         }
     }
 }
