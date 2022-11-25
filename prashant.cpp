@@ -65,7 +65,7 @@ void handlePipes(string cmd)
                 dup2(fd[1], 1);
             }
             close(fd[0]);
-            // execute_given_command(individualCommand[i]);
+            execute_given_command(individualCommand[i]);
             exit(EXIT_SUCCESS);
         }
         else if (newProcess < 0)
