@@ -86,19 +86,9 @@ void handlePipes(string cmd)
         return;
     }
 }
-
-void checkPipes(string cmd)
-{
-    // check is pipe exist or not in command
-    if (cmd.find("|"))
-    {
-        handlePipes(cmd);
-    }
-}
-
 void pipeCmd(string cmd)
 {
-    checkPipes(cmd);
+    handlePipes(cmd);
 }
 
 pair<string, string> aliasHandle(string cmd)
@@ -137,7 +127,12 @@ pair<string, string> aliasHandle(string cmd)
     }
     arguments.push_back(temp);
     string key = arguments[1];
-    string value = arguments[2];
+
+    string value = "";
+    for (int i = 2; i < arguments.size(); i++)
+    {
+        value += arguments[i];
+    }
     pair<string, string> retVal;
     retVal.first = key;
     retVal.second = value;
