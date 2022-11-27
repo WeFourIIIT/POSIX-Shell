@@ -1,5 +1,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
+#include <vector>
+#include <string>
 
 #include "prashant.h"
 #include "ujjwal.h"
@@ -8,7 +10,7 @@ using namespace std;
 void handlePipes(string cmd)
 {
     string temp = "";
-    vector<string> individualCommand;
+    std::vector<std::string> individualCommand;
     for (int i = 0; i < (int)cmd.size(); i++)
     {
         if (cmd[i] != '|')
@@ -103,7 +105,7 @@ void pipeCmd(string cmd)
 
 pair<string, string> aliasHandle(string cmd)
 {
-    vector<string> arguments;
+    std::vector<std::string> arguments;
     string temp = "";
     int flag = 1;
     for (int i = 0; i < (int)cmd.size(); i++)
@@ -136,9 +138,9 @@ pair<string, string> aliasHandle(string cmd)
         }
     }
     arguments.push_back(temp);
-    string key = arguments[1];
-    string value = arguments[2];
-    pair<string, string> retVal;
+    std::string key = arguments[1];
+    std::string value = arguments[2];
+    std::pair<std::string, std::string> retVal;
     retVal.first = key;
     retVal.second = value;
     return retVal;
