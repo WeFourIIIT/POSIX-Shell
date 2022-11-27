@@ -1,5 +1,11 @@
-sleep 20 &
-jobs
-sleep 50 &
-jobs
+echo $PATH
+echo $HOME
+alarm 2 Rishabh
+mkdir test1
+rm -rf test
+cd ..
+rm -rf POSIX-Shell/test1
+cd POSIX-Shell
+ls -al
 history
+quit

@@ -23,10 +23,10 @@ struct termios oldTermios, newTermios;
 vector<string> commands;
 struct winsize winSize;
 string histFileName = "history.txt";
-vector<string> hist;
 his_trie root;
 Trie trie;
 int lastRow;
+int globalCount = 0;
 
 // Place cursor based on x and y coordinates
 void placeCursor(int x, int y) {
@@ -302,13 +302,10 @@ void parseInputString(string command) {
         // I've not implemented the jobs command
     }else if(splittedCommand[0] == "quit") {
         // Can save the history.. Look into it
-        for(int i = 0; i < hist.size(); i++) {
-            cout<<hist[i]<<endl;
-        }
-        save_history(root, new his_trie(), histFileName);
+        save_history(root, histFileName);
         exit(EXIT_SUCCESS);
     }else if(splittedCommand[0] == "history") {
-        // print_history();
+        print_history(root);
     }else if(splittedCommand[0] == "clear") {
         clearScreen();
     }else if(splittedCommand[0] == "export") {
@@ -336,7 +333,13 @@ void parseInputString(string command) {
         unsetEnvironment(splittedCommand[1]);
     }else{
         if(aliasUnorderedMap.find(splittedCommand[0]) != aliasUnorderedMap.end()) {
-            handleBasicCommands(aliasUnorderedMap[splittedCommand[0]]);
+            string modifiedCommand = "";
+            splittedCommand[0] = aliasUnorderedMap[splittedCommand[0]];
+            for(int i = 0; i <splittedCommand.size(); i++) {
+                modifiedCommand += splittedCommand[i] + " ";
+            }
+            modifiedCommand.pop_back();
+            handleBasicCommands(modifiedCommand);
         }else{
             // cat, ls, mkdir, touch, nano, cd, pwd, whoami
             if(splittedCommand[0] == "cd") {
@@ -352,21 +355,38 @@ void parseInputString(string command) {
 }
 
 void takeInput() {
+    // username@hostname:path > 
     string s;
     char ch;
-    load_history(root, new his_trie(), histFileName);
-    trie.populateTrie();
+    vector<string> pathDirs = splitCommand(getEnvVariable("PATH"), " ");
+    trie.populateTrie(pathDirs);
     // int commandIdx = -1;
     while(true) {
-        string prompt = getEnvVariable("PS1");
-        if(prompt.size() == 0) {
+        string ps1 = getEnvVariable("PS1");
+        string prompt = "";
+        string homePath = getEnvVariable("HOME");
+        char pathBuff[200];
+        string cwd = getcwd(pathBuff, sizeof(pathBuff));
+        string promptPath = "";
+        if(homePath.size() <= cwd.size() && cwd.substr(0, homePath.size()) == homePath) {
+            promptPath = "~" + cwd.substr(homePath.size());
+        }else{
+            promptPath = cwd;
+        }
+        if(ps1.size() == 0) {
             char buffer[256];
             gethostname(buffer, sizeof(buffer));
             string host = buffer;
             getlogin_r(buffer, sizeof(buffer));
             string user = buffer;
             string separator = geteuid() ? "@" : "#";
-            prompt = user + separator + host + " > ";
+            if(separator == "@") {
+                prompt = user + separator + host + ":" + promptPath + " > ";
+            }else{
+                prompt = "root" + separator + host + ":" + promptPath + " > ";
+            }
+        }else{
+            prompt = promptPath + ps1;
         }
         cout<<prompt;
         s = "";
@@ -449,7 +469,8 @@ void takeInput() {
         if(ch == 10){
             // Enter key was pressed
             if(s != "") {
-                hist.push_back(s);
+                globalCount++;
+                root.insert(&root, s, globalCount);
                 parseInputString(s);
             }
             cout<<endl;
@@ -463,5 +484,6 @@ void initialise() {
     clearScreen();
     readEnvVariables();
     switchToCanonicalMode();
+    load_history(&root, histFileName, globalCount);
     takeInput();
 }

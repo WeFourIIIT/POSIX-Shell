@@ -1,6 +1,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <dirent.h>
 #include <limits.h>
 using namespace std;
 void insertWordInTrie(string);
@@ -311,9 +312,29 @@ public:
         insert(word);
     }
 
-    void populateTrie() /// priyank  done    moved
+    void populateTrie(vector<string> &path_variable) /// priyank  done    moved
     {
-        vector<string> basicCommands = {"ls", "echo", "touch", "mkdir", "grep", "pwd", "cd", "cat", "head", "tail", "exit", "history", "clear", "cp"};
+        vector<string> basicCommands; 
+        DIR *dr; 
+        struct dirent *en;
+ 
+        for(unsigned int i=0;i<path_variable.size();i++) 
+        { 
+            dr = opendir(path_variable[i].c_str()); //open all directory 
+            if (dr)  
+            { 
+                while ((en = readdir(dr)) != NULL)  
+                { 
+                    string type="other"; 
+                    if(en->d_type==DT_REG) 
+                    { 
+                        basicCommands.push_back(string(en->d_name)); 
+                    }
+                } 
+                closedir(dr); //close all directory 
+            } 
+ 
+        } 
 
         for (int i = 0; i < basicCommands.size(); i++)
         {
@@ -326,39 +347,37 @@ public:
 class his_trie
 {
     public:
-        his_trie *ref[26]={NULL};
+        his_trie *ref[256]={NULL};
         bool flag=false;
         int count=0;
 
-    void insert(his_trie * curr,string word,int &gb_count)
-    {    
+    void insert(his_trie *curr, string word, int &gb_count)
+    {
         char ch;
+        his_trie *curr1 = curr;
         for(int i=0;i<word.size();i++)
         {
             ch=word[i];
-            if(!curr->char_exist(ch))
+            int ascii=0;
+            ascii=int(ch);
+            if(curr1->ref[ascii]==NULL)
             {
                 his_trie *temp=new his_trie();
-                curr->ref[ch-'a']=temp;
+                curr1->ref[ascii]=temp;
             }
-            curr=curr->ref[ch-'a'];
-            //cout<<ch<<" ";
-
+            curr1=curr1->ref[ascii];
         }
-        curr->flag=true;
-        curr->count=gb_count;
-        //cout<<endl;
+        curr1->flag=true;
+        curr1->count=gb_count;
     }
 
     bool char_exist(char ch)
     {
-        return ( ref[ch-'a']!=NULL );
+        return ref[int(ch)]!=NULL;
     }
 
     bool check(his_trie * curr,string word)
     {
-        // if(word=="")
-        //     return false;
         bool is_there=true;
         char ch;
         for(int i=0;i<word.size();i++)
@@ -369,22 +388,17 @@ class his_trie
             else
                 return false;
 
-            curr=curr->ref[ch-'a'];
+            curr=curr->ref[int(ch)];
 
         }
-        //cout<<" Subset checked "<<endl;
         if(curr->flag==true)
             return true;
-        return false;    
-
+        return false;
     }
 
-    bool is_valid_prefix(his_trie *curr,string word,vector< pair<int,string> >&prefix)
+    bool is_valid_prefix(his_trie *curr,string word,vector<pair<int,string> >&prefix)
     {
-        // if(word=="")
-        //     return false;
         char ch;
-        // string element="";
         for(int i=0;i<word.size();i++)
         {
             ch=word[i];
@@ -393,44 +407,31 @@ class his_trie
             {
                 return false;
             }
-            curr=curr->ref[ch-'a'];
-
+            curr=curr->ref[int(ch)];
         }
-        // prefix is found to be valid
-
-        // char c_arr[2000];
-        // collect_strings(prefix,curr,c_arr,word);
         collect_strings(prefix,curr,word);
-
-
         return true;
     }
     // void collect_strings(vector<string>&prefix,his_trie * curr,char *c_arr,string word,int pos=0)
     void collect_strings(vector< pair<int,string> >&prefix,his_trie * curr,string word)
     {
-        // if(curr==NULL)
-        //     return;
         if(curr->flag==true)
         {
             prefix.push_back({curr->count,word});
         }
-            
-        
-        for(int i=0;i<26;i++)
+        for(int i=0;i<256;i++)
         {
             if(curr->ref[i]!=NULL)
             {
-                //c_arr[pos]='a'+i;
-                word+='a'+i;
-
-                // collect_strings(prefix,curr->ref[i],c_arr,word,pos+1);
+                char x=i;
+                word+=x;
                 collect_strings(prefix,curr->ref[i],word);
                 word.pop_back();
             }
         }
-
     }
 };
 
-void load_history(his_trie, his_trie *, string);
-void save_history(his_trie, his_trie *, string);
+void load_history(his_trie*, string, int &);
+void save_history(his_trie, string);
+void print_history(his_trie);
