@@ -1,19 +1,22 @@
 #include <unistd.h>
+#include <vector>
+#include <string>
+#include <iostream>
 #include "rishabh.h"
-void alarmMessage(vector<string> mymsg, int sec) // if (args[0] == "alarm") alarmMessage(args, stoi(args[1]));
+void alarmMessage(std::vector<std::string> mymsg, int sec) // if (args[0] == "alarm") alarmMessage(args, stoi(args[1]));
 {
     int mysize;
     mysize = mymsg.size();
     if (mysize < 3)
     {
-        cout<<endl<<"Invalid alarm";
-        cout<<endl;
+        std::cout<<std::endl<<"Invalid alarm";
+        std::cout<<std::endl;
         return;
     }
     else
     {
 
-        string sms;
+        std::string sms;
         sms = "";
 
         int i;
@@ -28,8 +31,8 @@ void alarmMessage(vector<string> mymsg, int sec) // if (args[0] == "alarm") alar
         pid_t pid = fork();
         if (pid == 0) {
             sleep(sec);
-            cout<<sms;
-            cout<<endl;
+            std::cout<<sms;
+            std::cout<<std::endl;
             exit(EXIT_SUCCESS);
         }else{
             return;

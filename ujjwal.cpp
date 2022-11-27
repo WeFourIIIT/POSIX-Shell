@@ -3,10 +3,16 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <algorithm>
+#include <map>
 #include <sys/wait.h>
-#include "ujjwal.h"
 #include "rishabh.h"
 #include "prashant.h"
+#include "priyank.h"
 
 using namespace std;
 
@@ -15,16 +21,29 @@ unordered_map<string, string> localEnvVars;
 unordered_map<string, string> aliasUnorderedMap;
 struct termios oldTermios, newTermios;
 vector<string> commands;
+struct winsize winSize;
+string histFileName = "history.txt";
+his_trie root;
+Trie trie;
+int lastRow;
+int globalCount = 0;
 
-void clearScreen(void)
-{
-    printf("\033[2J\033[1;1H");
-}
 // Place cursor based on x and y coordinates
 void placeCursor(int x, int y)
 {
     cout << "\033[" << x << ";" << y << "H";
     fflush(stdout);
+}
+
+void clearScreen(void)
+{
+    printf("\033[2J\033[1;1H");
+    placeCursor(lastRow, 0);
+}
+
+void clearLine()
+{
+    cout << "\033[2K";
 }
 
 void print(string s)
@@ -86,6 +105,9 @@ void switchToCanonicalMode()
     newTermios.c_cc[VMIN] = 1;
     newTermios.c_cc[VTIME] = 0;
     tcsetattr(0, TCSANOW, &newTermios);
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &winSize);
+    lastRow = winSize.ws_row;
+    placeCursor(lastRow - 1, 0);
     return;
 }
 
@@ -341,7 +363,7 @@ void parseInputString(string command)
         // else if() {Implement redirection in echo}
         else
         {
-            print(splittedCommand[1]);
+            handleBasicCommands(command);
         }
     }
     else if (splittedCommand[0] == "jobs")
@@ -351,11 +373,12 @@ void parseInputString(string command)
     else if (splittedCommand[0] == "quit")
     {
         // Can save the history.. Look into it
+        save_history(root, histFileName);
         exit(EXIT_SUCCESS);
     }
     else if (splittedCommand[0] == "history")
     {
-        // print_history();
+        print_history(root);
     }
     else if (splittedCommand[0] == "clear")
     {
@@ -402,13 +425,22 @@ void parseInputString(string command)
     {
         if (aliasUnorderedMap.find(splittedCommand[0]) != aliasUnorderedMap.end())
         {
-            handleBasicCommands(aliasUnorderedMap[splittedCommand[0]]);
+            string modifiedCommand = "";
+            splittedCommand[0] = aliasUnorderedMap[splittedCommand[0]];
+            for (int i = 0; i < splittedCommand.size(); i++)
+            {
+                modifiedCommand += splittedCommand[i] + " ";
+            }
+            modifiedCommand.pop_back();
+            handleBasicCommands(modifiedCommand);
         }
         else
         {
             // cat, ls, mkdir, touch, nano, cd, pwd, whoami
             if (splittedCommand[0] == "cd")
             {
+                if (splittedCommand[1] == "~")
+                    splittedCommand[1] = getEnvVariable("HOME");
                 if (chdir(splittedCommand[1].c_str()) != 0)
                 {
                     cout << endl
@@ -425,13 +457,29 @@ void parseInputString(string command)
 
 void takeInput()
 {
+    // username@hostname:path >
     string s;
     char ch;
+    vector<string> pathDirs = splitCommand(getEnvVariable("PATH"), " ");
+    trie.populateTrie(pathDirs);
     // int commandIdx = -1;
     while (true)
     {
-        string prompt = getEnvVariable("PS1");
-        if (prompt.size() == 0)
+        string ps1 = getEnvVariable("PS1");
+        string prompt = "";
+        string homePath = getEnvVariable("HOME");
+        char pathBuff[200];
+        string cwd = getcwd(pathBuff, sizeof(pathBuff));
+        string promptPath = "";
+        if (homePath.size() <= cwd.size() && cwd.substr(0, homePath.size()) == homePath)
+        {
+            promptPath = "~" + cwd.substr(homePath.size());
+        }
+        else
+        {
+            promptPath = cwd;
+        }
+        if (ps1.size() == 0)
         {
             char buffer[256];
             gethostname(buffer, sizeof(buffer));
@@ -439,7 +487,18 @@ void takeInput()
             getlogin_r(buffer, sizeof(buffer));
             string user = buffer;
             string separator = geteuid() ? "@" : "#";
-            prompt = user + separator + host + " > ";
+            if (separator == "@")
+            {
+                prompt = user + separator + host + ":" + promptPath + " > ";
+            }
+            else
+            {
+                prompt = "root" + separator + host + ":" + promptPath + " > ";
+            }
+        }
+        else
+        {
+            prompt = promptPath + ps1;
         }
         cout << prompt;
         s = "";
@@ -488,6 +547,62 @@ void takeInput()
                     // Left key was pressed
                 }
             }
+            else if (ch == '\t')
+            {
+                // TAB key was pressed
+                string lastWord;
+                vector<string> autoCompletionResults;
+                if (s.find_last_of(' ') != string::npos)
+                {
+                    lastWord = s.substr(s.find_last_of(' '));
+                }
+                else
+                {
+                    lastWord = s;
+                }
+                // trim(lastWord);
+                trie.autocomplete(lastWord, autoCompletionResults);
+                // for(int i = 0; i < autoCompletionResults.size(); i++) {
+                //     cout<<autoCompletionResults[i]<<" ";
+                // }
+                if (autoCompletionResults.empty())
+                {
+                    // Auto completion result is empty.. Nothing stored in tried in context to lastWord
+                    cout << endl;
+                    break;
+                }
+                else if (autoCompletionResults.size() == 1)
+                {
+                    // Only one result in trie in context to lastWord
+                    // Just replace the lastWord with the result
+                    // trim(s);
+                    cout << s;
+                    if (s.find(' ') == string::npos)
+                    {
+                        // There is only one word in the input command
+                        s = autoCompletionResults[0];
+                    }
+                    else
+                    {
+                        s = s.substr(0, s.find_last_of(' '));
+                        s = s + ' ' + autoCompletionResults[0];
+                    }
+                    clearLine();
+                    placeCursor(lastRow, 0);
+                    cout << prompt << s;
+                }
+                else
+                {
+                    // Many words stored in trie
+                    cout << endl;
+                    for (int i = 0; i < autoCompletionResults.size(); i++)
+                    {
+                        cout << autoCompletionResults[i] << " ";
+                    }
+                    cout << endl;
+                    break;
+                }
+            }
             else
             {
                 s += ch;
@@ -498,6 +613,8 @@ void takeInput()
             // Enter key was pressed
             if (s != "")
             {
+                globalCount++;
+                root.insert(&root, s, globalCount);
                 parseInputString(s);
             }
             cout << endl;
@@ -512,5 +629,6 @@ void initialise()
     clearScreen();
     readEnvVariables();
     switchToCanonicalMode();
+    load_history(&root, histFileName, globalCount);
     takeInput();
 }
