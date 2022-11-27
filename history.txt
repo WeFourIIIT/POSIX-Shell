@@ -8,4 +8,5 @@ rm -rf POSIX-Shell/test1
 cd POSIX-Shell
 ls -al
 history
+which history
 quit
