@@ -27,6 +27,8 @@ his_trie root;
 Trie trie;
 int lastRow;
 int globalCount = 0;
+bool isRecording = false;
+string recordFilePath = "record.txt";
 
 // Place cursor based on x and y coordinates
 void placeCursor(int x, int y)
@@ -296,6 +298,31 @@ void handleBasicCommands(string args)
     }
 }
 
+void handleRecording(string recordFile, string command) {
+    ofstream fout;
+    fout.open(recordFile.c_str(), std::ios::app);
+    fout<<command;
+    fout<<"\n";
+    fout.close();
+    cout<<endl<<"Writing successful"<<endl;
+    int pid = fork();
+    int fd1 = open(recordFile.c_str(), O_APPEND | O_WRONLY | O_CREAT, 0644);
+    if(isRecording) {
+        if (!pid)
+        {
+            dup2(fd1, 1);
+            execl("/bin/sh", "sh", "-c", command.c_str(), NULL);
+        }
+        else
+        {
+            wait(&pid);
+            close(fd1);
+            cout << endl;
+            return;
+        }
+    }
+}
+
 void parseInputString(string command)
 {
     vector<string> splittedCommand = splitCommand(command, " ");
@@ -364,6 +391,9 @@ void parseInputString(string command)
         else
         {
             handleBasicCommands(command);
+            if(isRecording) {
+                handleRecording(recordFilePath, command);
+            }
         }
     }
     else if (splittedCommand[0] == "jobs")
@@ -424,10 +454,11 @@ void parseInputString(string command)
     }
     else if(splittedCommand[0] == "record") {
         if(splittedCommand[1] == "start") {
-            // handleRecordStart
+            isRecording = true;
         }else if(splittedCommand[1] == "stop") {
-            // handleRecordStop
+            isRecording = false;
         }
+        cout<<isRecording;
     }
     else
     {
@@ -458,6 +489,9 @@ void parseInputString(string command)
             else
             {
                 handleBasicCommands(command);
+                if(isRecording) {
+                   handleRecording(recordFilePath, command);
+                }
             }
         }
     }

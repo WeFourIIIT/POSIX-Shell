@@ -1,0 +1,48 @@
+ls -al
+total 2056
+drwxr-xr-x  25 ujjwalprakash  staff     800 Nov 28 00:23 .
+drwxr-xr-x  13 ujjwalprakash  staff     416 Nov 27 23:25 ..
+-rw-r--r--   1 ujjwalprakash  staff     124 Nov 27 23:36 .bashrc
+drwxr-xr-x  16 ujjwalprakash  staff     512 Nov 27 23:48 .git
+-rw-r--r--   1 ujjwalprakash  staff     329 Nov 27 22:35 .gitignore
+drwxr-xr-x   3 ujjwalprakash  staff      96 Nov 28 00:13 .vscode
+-rw-r--r--   1 ujjwalprakash  staff   35149 Nov 11 20:26 LICENSE
+-rw-r--r--@  1 ujjwalprakash  staff     475 Nov 27 22:35 Makefile
+-rw-r--r--   1 ujjwalprakash  staff     451 Nov 28 00:21 history.txt
+-rw-r--r--   1 ujjwalprakash  staff     225 Nov 27 22:36 main.cpp
+-rw-r--r--   1 ujjwalprakash  staff     760 Nov 28 00:12 main.o
+-rw-r--r--   1 ujjwalprakash  staff    3572 Nov 27 22:36 prashant.cpp
+-rw-r--r--   1 ujjwalprakash  staff     115 Nov 27 22:35 prashant.h
+-rw-r--r--   1 ujjwalprakash  staff   51416 Nov 28 00:15 prashant.o
+-rw-r--r--   1 ujjwalprakash  staff    2465 Nov 27 23:35 priyank.cpp
+-rw-r--r--   1 ujjwalprakash  staff   11184 Nov 27 23:32 priyank.h
+-rw-r--r--   1 ujjwalprakash  staff   87856 Nov 28 00:15 priyank.o
+-rw-r--r--   1 ujjwalprakash  staff       7 Nov 28 00:23 record.txt
+-rw-r--r--   1 ujjwalprakash  staff    1009 Nov 27 22:35 rishabh.cpp
+-rw-r--r--   1 ujjwalprakash  staff     134 Nov 27 22:35 rishabh.h
+-rw-r--r--   1 ujjwalprakash  staff   25496 Nov 28 00:15 rishabh.o
+-rwxr-xr-x   1 ujjwalprakash  staff  345144 Nov 28 00:22 shell
+-rw-r--r--   1 ujjwalprakash  staff   17403 Nov 28 00:22 ujjwal.cpp
+-rw-r--r--   1 ujjwalprakash  staff     193 Nov 27 22:36 ujjwal.h
+-rw-r--r--   1 ujjwalprakash  staff  284920 Nov 28 00:22 ujjwal.o
+cat Makefile
+shell: main.o ujjwal.o priyank.o prashant.o rishabh.o
+	g++ -std=c++14 -w main.o ujjwal.o priyank.o prashant.o rishabh.o -o shell
+
+main.o: main.cpp
+	g++ -std=c++14 -w -c main.cpp
+
+ujjwal.o: ujjwal.cpp ujjwal.h
+	g++ -std=c++14 -w -c ujjwal.cpp
+
+priyank.o: priyank.cpp priyank.h
+	g++ -std=c++14 -w -c priyank.cpp
+
+prashant.o: prashant.cpp prashant.h
+	g++ -std=c++14 -w -c prashant.cpp
+
+rishabh.o: rishabh.cpp rishabh.h
+	g++ -std=c++14 -w -c rishabh.cpp
+
+clean:
+	rm -rf *.o shell

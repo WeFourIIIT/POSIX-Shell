@@ -1,11 +1,9 @@
-echo $PATH
 echo $HOME
 mkdir test1
 rm -rf test
 cd ..
 rm -rf POSIX-Shell/test1
 cd POSIX-Shell
-ls -al
 which history
 echo Ujjwal > test
 echo Prashant >> test
@@ -19,4 +17,10 @@ export -p
 alarm 2 Rishabh
 open Makefile
 history
+cat record.txt
+echo $PATH
+record start
+cat Makefile
+record stop
+ls -al
 quit
