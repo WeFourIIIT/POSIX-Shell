@@ -1,5 +1,15 @@
 #include <unistd.h>
 #include "rishabh.h"
+
+struct bg_job
+{
+    char job_name[300];
+    pid_t PID;
+};
+
+// bg_job jobs[50];
+vector<bg_job> jobs;
+
 void alarmMessage(vector<string> mymsg, int sec) // if (args[0] == "alarm") alarmMessage(args, stoi(args[1]));
 {
     int mysize;
