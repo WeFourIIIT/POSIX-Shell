@@ -76,7 +76,7 @@ void save_history(his_trie root, string hist_filename)  // priyank
     fclose(file);
 }
 
-void print_history(his_trie root)  // priyank_added
+void print_history(his_trie root, int limit)  // priyank_added
 {
     vector< pair<int,string> > print_vec;
     print_vec.clear();
@@ -84,7 +84,10 @@ void print_history(his_trie root)  // priyank_added
     root.is_valid_prefix(curr,"",print_vec); // priyank_added
     sort(print_vec.begin(),print_vec.end());
     reverse(print_vec.begin(),print_vec.end());
-    for(int i=0;i<print_vec.size();i++)
+    int size;
+    if(limit >= print_vec.size()) size = print_vec.size();
+    else size = limit;
+    for(int i=0; i < size; i++)
     {
         cout<<endl<<print_vec[i].second;
     }

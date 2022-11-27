@@ -378,7 +378,8 @@ void parseInputString(string command)
     }
     else if (splittedCommand[0] == "history")
     {
-        print_history(root);
+        int limit = stoi(getEnvVariable("HISTSIZE"));
+        print_history(root, limit);
     }
     else if (splittedCommand[0] == "clear")
     {
@@ -421,18 +422,25 @@ void parseInputString(string command)
         // unsetenv COLLEGE
         unsetEnvironment(splittedCommand[1]);
     }
+    else if(splittedCommand[0] == "record") {
+        if(splittedCommand[1] == "start") {
+            // handleRecordStart
+        }else if(splittedCommand[1] == "stop") {
+            // handleRecordStop
+        }
+    }
     else
     {
         if (aliasUnorderedMap.find(splittedCommand[0]) != aliasUnorderedMap.end())
         {
             string modifiedCommand = "";
             splittedCommand[0] = aliasUnorderedMap[splittedCommand[0]];
-            for (int i = 0; i < splittedCommand.size(); i++)
-            {
-                modifiedCommand += splittedCommand[i] + " ";
-            }
-            modifiedCommand.pop_back();
-            handleBasicCommands(modifiedCommand);
+            // for (int i = 0; i < splittedCommand.size(); i++)
+            // {
+            //     modifiedCommand += splittedCommand[i] + " ";
+            // }
+            // modifiedCommand.pop_back();
+            parseInputString(splittedCommand[0]);
         }
         else
         {

@@ -1,12 +1,22 @@
 echo $PATH
 echo $HOME
-alarm 2 Rishabh
 mkdir test1
 rm -rf test
 cd ..
 rm -rf POSIX-Shell/test1
 cd POSIX-Shell
 ls -al
-history
 which history
+echo Ujjwal > test
+echo Prashant >> test
+echo Kutta > test
+cat file1.txt | sort | uniq > save.txt
+cat file1.txt | head -8 | sort | tail -5 | echo > ujju.txt
+cat file1.txt | head -8 | sort | tail -5
+export COLLEGE=IIIT
+echo $COLLEGE
+export -p
+alarm 2 Rishabh
+open Makefile
+history
 quit

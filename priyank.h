@@ -434,4 +434,4 @@ class his_trie
 
 void load_history(his_trie*, string, int &);
 void save_history(his_trie, string);
-void print_history(his_trie);
+void print_history(his_trie, int);
