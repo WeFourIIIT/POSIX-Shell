@@ -326,7 +326,7 @@ Trie *trie = new Trie();
 class his_trie
 {
     public:
-        his_trie *ref[26]={NULL};
+        his_trie *ref[256]={NULL};
         bool flag=false;
         int count=0;
 
@@ -336,23 +336,29 @@ class his_trie
         for(int i=0;i<word.size();i++)
         {
             ch=word[i];
-            if(!curr->char_exist(ch))
+
+            int ascii=0;
+            ascii=int(ch);
+            // cout<<ascii;
+
+            if(curr->ref[ascii]==NULL)
             {
                 his_trie *temp=new his_trie();
-                curr->ref[ch-'a']=temp;
+                curr->ref[ascii]=temp;
+                // cout<<ch<<":"<<ascii<<"\n";
             }
-            curr=curr->ref[ch-'a'];
-            //cout<<ch<<" ";
+            curr=curr->ref[ascii];
+            // cout<<ch<<" ";
 
         }
         curr->flag=true;
         curr->count=gb_count;
-        //cout<<endl;
+
     }
 
     bool char_exist(char ch)
     {
-        return ( ref[ch-'a']!=NULL );
+        return ( ref[int(ch)]!=NULL );
     }
 
 
@@ -370,7 +376,7 @@ class his_trie
             else
                 return false;
 
-            curr=curr->ref[ch-'a'];
+            curr=curr->ref[int(ch)];
 
         }
         //cout<<" Subset checked "<<endl;
@@ -395,7 +401,7 @@ class his_trie
             {
                 return false;
             }
-            curr=curr->ref[ch-'a'];
+            curr=curr->ref[int(ch)];
 
         }
         // prefix is found to be valid
@@ -419,12 +425,14 @@ class his_trie
         }
             
         
-        for(int i=0;i<26;i++)
+        for(int i=0;i<256;i++)
         {
             if(curr->ref[i]!=NULL)
             {
                 //c_arr[pos]='a'+i;
-                word+='a'+i;
+                char x=i;
+
+                word+=x;
 
                 // collect_strings(prefix,curr->ref[i],c_arr,word,pos+1);
                 collect_strings(prefix,curr->ref[i],word);
@@ -438,6 +446,7 @@ class his_trie
 
 his_trie root;
 his_trie *curr=new his_trie();
+
 
  /////////////////// his_trie ENDS
 
