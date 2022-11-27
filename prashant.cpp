@@ -1,6 +1,5 @@
 #include <sys/wait.h>
 #include <unistd.h>
-
 #include "prashant.h"
 #include "ujjwal.h"
 
@@ -43,38 +42,42 @@ void handlePipes(string cmd)
     // for reading end fd[0]    //1B at a time
     // sender(writring end)--> receiver(reading end)
 
-    int fd[2], receiveData;
+    int fd[2], receiveData = 0;
     pid_t newProcess;
-
-    for (int i = 0; !individualCommand[i].empty(); i++)
+    if (getEnvVariable("HOME").empty())
     {
-        pipe(fd);
-        newProcess = fork();
-        if (newProcess > 0) // parent process
+        for (int i = 0; !individualCommand[i].empty(); i++)
         {
-            // wait is an inbuilt command in the Linux shell.
-            // It waits for the process to change its state i.e.
-            // it waits for any running process to complete and returns the exit status.
-            wait(NULL);
-            close(fd[1]);
-            receiveData = fd[0];
-        }
-        else if (newProcess == 0) // child process
-        {
-            dup2(receiveData, 0);
-            if (individualCommand[i + 1] != "\0" && (!individualCommand[i + 1].empty()))
+            pipe(fd);
+            newProcess = fork();
+            if (newProcess > 0) // parent process
             {
-                dup2(fd[1], 1);
+                // wait is an inbuilt command in the Linux shell.
+                // It waits for the process to change its state i.e.
+                // it waits for any running process to complete and returns the exit status.
+                wait(NULL);
+                close(fd[1]);
+                receiveData = fd[0];
             }
-            close(fd[0]);
-            parseInputString(individualCommand[i]);
-            exit(EXIT_SUCCESS);
-        }
-        else if (newProcess < 0)
-        {
-            perror("Fork Failed");
+            else if (newProcess == 0) // child process
+            {
+                dup2(receiveData, 0);
+                if (individualCommand[i + 1] != "\0" && (!individualCommand[i + 1].empty()))
+                {
+                    dup2(fd[1], 1);
+                }
+                close(fd[0]);
+                parseInputString(individualCommand[i]);
+                // cout << endl;
+                exit(EXIT_SUCCESS);
+            }
+            else if (newProcess < 0)
+            {
+                perror("Fork Failed");
+            }
         }
     }
+    cout << endl;
     int procId = fork();
     if (procId == 0)
     {

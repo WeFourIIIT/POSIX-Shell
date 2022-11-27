@@ -351,7 +351,7 @@ void parseInputString(string command)
     else if (splittedCommand[0] == "quit")
     {
         // Can save the history.. Look into it
-        exit(0);
+        exit(EXIT_SUCCESS);
     }
     else if (splittedCommand[0] == "history")
     {
@@ -368,6 +368,7 @@ void parseInputString(string command)
     else if (splittedCommand[0] == "alarm")
     {
         // Rishabh has to implement this
+        alarmMessage(splittedCommand, stoi(splittedCommand[1]));
     }
     else if (splittedCommand[0] == "open")
     {
@@ -406,7 +407,18 @@ void parseInputString(string command)
         else
         {
             // cat, ls, mkdir, touch, nano, cd, pwd, whoami
-            handleBasicCommands(command);
+            if (splittedCommand[0] == "cd")
+            {
+                if (chdir(splittedCommand[1].c_str()) != 0)
+                {
+                    cout << endl
+                         << "Invalid path" << endl;
+                }
+            }
+            else
+            {
+                handleBasicCommands(command);
+            }
         }
     }
 }

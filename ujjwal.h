@@ -3,7 +3,7 @@
 using namespace std;
 
 void initialiseTerminal(void);
-string getEnvVariable(void);
+string getEnvVariable(string);
 void clearScreen(void);
 void initialise(void);
 void exitShell(int);
