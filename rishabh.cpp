@@ -3,7 +3,8 @@
 #include <string>
 #include <iostream>
 #include "rishabh.h"
-void alarmMessage(std::vector<std::string> mymsg, int sec) // if (args[0] == "alarm") alarmMessage(args, stoi(args[1]));
+#include "ujjwal.h"
+void alarmMessage(std::vector<std::string> mymsg, int sec, std::string &recordFilePath) // if (args[0] == "alarm") alarmMessage(args, stoi(args[1]));
 {
     int mysize;
     mysize = mymsg.size();
@@ -32,7 +33,8 @@ void alarmMessage(std::vector<std::string> mymsg, int sec) // if (args[0] == "al
         if (pid == 0) {
             sleep(sec);
             std::cout<<sms;
-            std::cout<<std::endl;
+            handleRecordingOutput(recordFilePath, sms);
+            putchar(10);
             exit(EXIT_SUCCESS);
         }else{
             return;

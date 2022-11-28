@@ -32,4 +32,10 @@ echo $?
 mkdir
 which nano
 history
+alarm 3 bfkdsab
+quir
+kfbsdkf
+alarm 3 fubai
+alarm 1 fbak
+alarm 2 fakbdgbsdvk
 quit

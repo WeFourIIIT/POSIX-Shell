@@ -22,12 +22,14 @@ unordered_map<string, string> aliasUnorderedMap;
 struct termios oldTermios, newTermios;
 vector<string> commands;
 struct winsize winSize;
-string histFileName = "history.txt";
+string histFilePath = "history.txt";
 his_trie root;
 Trie trie;
 int lastRow;
 int globalCount = 0;
 bool isRecording = false;
+char cwdBuffer[200];
+string launchDir;
 string recordFilePath = "record.txt";
 
 // Place cursor based on x and y coordinates
@@ -134,7 +136,7 @@ void handleRedirection(string command, string redirectionType)
 
     const char *arg[] = {src.c_str(), destination.c_str()};
     int pid = fork();
-    int fd1 = open(destination.c_str(), redirectionType == ">" ? O_TRUNC | O_CREAT | O_WRONLY : O_APPEND | O_WRONLY, 0644);
+    int fd1 = open(destination.c_str(), redirectionType == ">" ? O_TRUNC | O_CREAT | O_WRONLY : O_APPEND | O_CREAT | O_WRONLY, 0644);
     if (!pid)
     {
         dup2(fd1, 1);
@@ -172,13 +174,6 @@ void changeDirectory(vector<string> &command)
     {
         return;
     }
-}
-
-string getCurrentWorkingDirectory()
-{
-    char buffer[2000];
-    getcwd(buffer, sizeof(buffer));
-    return string(buffer);
 }
 
 void exportVariable(vector<string> &command)
@@ -312,8 +307,7 @@ void handleRecordingNoOutput(string recordFile, string command) {
     if(isRecording) {
         ofstream fout;
         fout.open(recordFile.c_str(), std::ios::app);
-        fout<<command<<" Infinite loop";
-        fout<<"\n";
+        fout<<command<<"\n";
         fout.close();
     }
 }
@@ -321,19 +315,23 @@ void handleRecordingNoOutput(string recordFile, string command) {
 void handleRecording(string recordFile, string command) {
     if(isRecording) {
         handleRecordingNoOutput(recordFile, command);
-        int pid = fork();
-        int fd1 = open(recordFile.c_str(), O_APPEND | O_WRONLY | O_CREAT, 0644);
-        if (!pid)
-        {
-            dup2(fd1, 1);
-            execl("/bin/sh", "sh", "-c", command.c_str(), NULL);
-        }
-        else
-        {
-            wait(&pid);
-            close(fd1);
-            cout << endl;
-            return;
+        vector<string> splittedCommand = splitCommand(command, " ");
+        string firstParam = splittedCommand[0];
+        if(firstParam != "touch" && firstParam != "nano" && firstParam != "mkdir" && firstParam != "cd") {
+            int pid = fork();
+            int fd1 = open(recordFile.c_str(), O_APPEND | O_WRONLY | O_CREAT, 0644);
+            if (!pid)
+            {
+                dup2(fd1, 1);
+                execl("/bin/sh", "sh", "-c", command.c_str(), NULL);
+            }
+            else
+            {
+                wait(&pid);
+                close(fd1);
+                cout << endl;
+                return;
+            }
         }
     }
 }
@@ -436,7 +434,7 @@ void parseInputString(string command)
     {
         // Can save the history.. Look into it
         handleRecordingNoOutput(recordFilePath, command);
-        save_history(root, histFileName);
+        save_history(root, histFilePath);
         exit(EXIT_SUCCESS);
     }
     else if (splittedCommand[0] == "history")
@@ -459,7 +457,7 @@ void parseInputString(string command)
     {
         // Rishabh has to implement this
         handleRecordingNoOutput(recordFilePath, command);
-        alarmMessage(splittedCommand, stoi(splittedCommand[1]));
+        alarmMessage(splittedCommand, stoi(splittedCommand[1]), recordFilePath);
     }
     else if (splittedCommand[0] == "open")
     {
@@ -694,6 +692,10 @@ void initialise()
     clearScreen();
     readEnvVariables();
     switchToCanonicalMode();
-    load_history(&root, histFileName, globalCount);
+    load_history(&root, histFilePath, globalCount);
+    getcwd(cwdBuffer, sizeof(cwdBuffer));
+    launchDir = string(cwdBuffer);
+    recordFilePath = launchDir + "/" + recordFilePath;
+    histFilePath = launchDir + "/" + histFilePath;
     takeInput();
 }
