@@ -298,16 +298,31 @@ void handleBasicCommands(string args)
     }
 }
 
-void handleRecording(string recordFile, string command) {
-    ofstream fout;
-    fout.open(recordFile.c_str(), std::ios::app);
-    fout<<command;
-    fout<<"\n";
-    fout.close();
-    cout<<endl<<"Writing successful"<<endl;
-    int pid = fork();
-    int fd1 = open(recordFile.c_str(), O_APPEND | O_WRONLY | O_CREAT, 0644);
+void handleRecordingOutput(string recordFile, string output) {
     if(isRecording) {
+        ofstream fout;
+        fout.open(recordFile.c_str(), std::ios::app);
+        fout<<output;
+        fout<<"\n";
+        fout.close();
+    }
+}
+
+void handleRecordingNoOutput(string recordFile, string command) {
+    if(isRecording) {
+        ofstream fout;
+        fout.open(recordFile.c_str(), std::ios::app);
+        fout<<command<<" Infinite loop";
+        fout<<"\n";
+        fout.close();
+    }
+}
+
+void handleRecording(string recordFile, string command) {
+    if(isRecording) {
+        handleRecordingNoOutput(recordFile, command);
+        int pid = fork();
+        int fd1 = open(recordFile.c_str(), O_APPEND | O_WRONLY | O_CREAT, 0644);
         if (!pid)
         {
             dup2(fd1, 1);
@@ -343,16 +358,19 @@ void parseInputString(string command)
         {
             handleRedirection(command, ">");
         }
+        handleRecordingNoOutput(recordFilePath, command);
     }
     else if (command.find('|') != string::npos)
     {
         // Handle | piping
         pipeCmd(command);
+        handleRecording(recordFilePath, command);
     }
     else if (command.back() == '&')
     {
         // Handle background command execution
-        handleBackgroundExec();
+        // handleBackgroundExec();
+        handleBasicCommands(command);
     }
     else if (splittedCommand[0] == "echo")
     {
@@ -364,22 +382,28 @@ void parseInputString(string command)
         else if (splittedCommand[1] == "$$")
         {
             // $$ is the PID of the current process
-            print(to_string(getpid()));
+            handleRecordingNoOutput(recordFilePath, command);
+            string processId = to_string(getpid());
+            print(processId);
+            handleRecordingOutput(recordFilePath, processId);
         }
         else if (splittedCommand[1] == "$?")
         {
             // $? is the return code of the last executed command.
-            // Look into implementing this
+            handleBasicCommands(command);
+            handleRecording(recordFilePath, command);
         }
         else if (splittedCommand[1][0] == '$')
         {
             // Print the environment variable
+            handleRecordingNoOutput(recordFilePath, command);
             string key = splittedCommand[1].substr(1);
             for (auto it : envVars)
             {
                 if (it.first == key)
                 {
                     print(it.second);
+                    handleRecordingOutput(recordFilePath, it.second);
                     return;
                 }
             }
@@ -388,6 +412,7 @@ void parseInputString(string command)
                 if (it.first == key)
                 {
                     print(it.second);
+                    handleRecordingOutput(recordFilePath, it.second);
                     return;
                 }
             }
@@ -405,40 +430,48 @@ void parseInputString(string command)
     else if (splittedCommand[0] == "jobs")
     {
         // I've not implemented the jobs command
+        handleBasicCommands(command);
     }
     else if (splittedCommand[0] == "quit")
     {
         // Can save the history.. Look into it
+        handleRecordingNoOutput(recordFilePath, command);
         save_history(root, histFileName);
         exit(EXIT_SUCCESS);
     }
     else if (splittedCommand[0] == "history")
     {
+        handleRecordingNoOutput(recordFilePath, command);
         int limit = stoi(getEnvVariable("HISTSIZE"));
-        print_history(root, limit);
+        print_history(root, limit, recordFilePath);
     }
     else if (splittedCommand[0] == "clear")
     {
+        handleRecordingNoOutput(recordFilePath, command);
         clearScreen();
     }
     else if (splittedCommand[0] == "export")
     {
+        handleRecordingNoOutput(recordFilePath, command);
         exportVariable(splittedCommand);
     }
     else if (splittedCommand[0] == "alarm")
     {
         // Rishabh has to implement this
+        handleRecordingNoOutput(recordFilePath, command);
         alarmMessage(splittedCommand, stoi(splittedCommand[1]));
     }
     else if (splittedCommand[0] == "open")
     {
         // Rishabh has to implement this
+        handleRecordingNoOutput(recordFilePath, command);
         string filePath = splittedCommand[1];
         fileOpen(filePath.c_str());
     }
     else if (splittedCommand[0] == "alias")
     {
         // Prashant has to implement this
+        handleRecordingNoOutput(recordFilePath, command);
         pair<string, string> alias = aliasHandle(command);
         aliasUnorderedMap[alias.first] = alias.second;
     }
@@ -450,21 +483,23 @@ void parseInputString(string command)
     {
         // Format would be like
         // setenv COLLEGE IIIT
+        handleRecordingNoOutput(recordFilePath, command);
         setEnvironment(splittedCommand[1], splittedCommand[2]);
     }
     else if (splittedCommand[0] == "unsetenv")
     {
         // Format would be like
         // unsetenv COLLEGE
+        handleRecordingNoOutput(recordFilePath, command);
         unsetEnvironment(splittedCommand[1]);
     }
     else if(splittedCommand[0] == "record") {
+        handleRecordingNoOutput(recordFilePath, command);
         if(splittedCommand[1] == "start") {
             isRecording = true;
         }else if(splittedCommand[1] == "stop") {
             isRecording = false;
         }
-        cout<<isRecording;
     }
     else
     {
@@ -519,28 +554,18 @@ void takeInput()
         {
             promptPath = cwd;
         }
-        if (ps1.size() == 0)
-        {
-            char buffer[256];
-            gethostname(buffer, sizeof(buffer));
-            string host = buffer;
-            getlogin_r(buffer, sizeof(buffer));
-            string user = buffer;
-            string separator = geteuid() ? "@" : "#";
-            if (separator == "@")
-            {
-                prompt = user + separator + host + ":" + promptPath + " > ";
-            }
-            else
-            {
-                prompt = "root" + separator + host + ":" + promptPath + " > ";
-            }
+        char buffer[256];
+        gethostname(buffer, sizeof(buffer));
+        string host = buffer;
+        getlogin_r(buffer, sizeof(buffer));
+        string user = buffer;
+        string separator = geteuid() ? "@" : "#";
+        if (separator == "@") {
+            prompt = user + separator + host + ":" + promptPath + ps1;
+        } else {
+            prompt = "root" + separator + host + ":" + promptPath + ps1;
         }
-        else
-        {
-            prompt = promptPath + ps1;
-        }
-        cout << prompt;
+        cout<<prompt;
         s = "";
         while ((ch = cin.get()) && ch != 10)
         {

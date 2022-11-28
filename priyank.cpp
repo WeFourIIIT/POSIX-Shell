@@ -76,7 +76,7 @@ void save_history(his_trie root, string hist_filename)  // priyank
     fclose(file);
 }
 
-void print_history(his_trie root, int limit)  // priyank_added
+void print_history(his_trie root, int limit, string &recordFilePath)  // priyank_added
 {
     vector< pair<int,string> > print_vec;
     print_vec.clear();
@@ -90,6 +90,7 @@ void print_history(his_trie root, int limit)  // priyank_added
     for(int i=0; i < size; i++)
     {
         cout<<endl<<print_vec[i].second;
+        handleRecordingOutput(recordFilePath, print_vec[i].second);
     }
     cout<<endl;
 }

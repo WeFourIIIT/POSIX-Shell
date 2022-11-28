@@ -44,7 +44,7 @@ void fileOpen(const char *filename) {
     pid_t pid = fork();
     if (pid == 0) {
         close(2);
-        execlp("open", "open", filename, NULL);
+        execlp("/usr/bin/open", "open", filename, NULL);
         exit(0);
     }
 }

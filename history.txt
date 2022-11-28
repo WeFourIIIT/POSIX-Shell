@@ -1,7 +1,6 @@
 echo $HOME
 mkdir test1
 rm -rf test
-cd ..
 rm -rf POSIX-Shell/test1
 cd POSIX-Shell
 which history
@@ -16,11 +15,21 @@ echo $COLLEGE
 export -p
 alarm 2 Rishabh
 open Makefile
-history
 cat record.txt
 echo $PATH
 record start
 cat Makefile
 record stop
 ls -al
+pwd
+cd ..
+lsl
+lllds
+kdjsbg
+cat Ujjwal
+fkjbkds
+echo $?
+mkdir
+which nano
+history
 quit

@@ -5,9 +5,7 @@
 #include <limits.h>
 using namespace std;
 void insertWordInTrie(string);
-void populateTrie(void); 
-void print_history(void);
-void print_history2(void);
+void populateTrie(void);
 static inline void trim(string &);
 // class TrieNode{
 //     public:
@@ -434,4 +432,4 @@ class his_trie
 
 void load_history(his_trie*, string, int &);
 void save_history(his_trie, string);
-void print_history(his_trie, int);
+void print_history(his_trie, int, string &);
