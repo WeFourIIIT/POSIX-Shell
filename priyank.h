@@ -24,6 +24,7 @@ public:
         this->word = "";
     }
 };
+
 class Trie
 {
 public:
@@ -50,17 +51,17 @@ public:
 
     }
 
-    bool check_final_node(TrieNode *root)  // done priyank
+    bool isLastNode(TrieNode *root)  // done priyank
     {
         return (root->children.size() == 0);
     }
 
-    void core_of_auto_complete(TrieNode *curr, string &n_pre, vector<string> &op) // dfs here done priyank
+    void autocompleteRecUtil(TrieNode *curr, string &n_pre, vector<string> &op) // dfs here done priyank
     {
         if (curr->isLeaf) 
             op.push_back(n_pre);
 
-        if (check_final_node(curr))
+        if (isLastNode(curr))
             return;
 
         for (auto idef = curr->children.begin(); idef != curr->children.end(); idef++) 
@@ -69,7 +70,7 @@ public:
 
             n_pre.push_back(idef->first);
 
-            core_of_auto_complete(n_ch, n_pre, op);
+            autocompleteRecUtil(n_ch, n_pre, op);
 
             n_pre.pop_back();
         }
@@ -94,22 +95,21 @@ public:
         }
 
         // prefix is found to be valid data
-        if (check_final_node(curr) && curr->isLeaf)
+        if (isLastNode(curr) && curr->isLeaf)
             op.push_back(prefix);
 
         // prefix is valid data , but last data of trie
-        if (check_final_node(curr))
+        if (isLastNode(curr))
         {
             return;
         }
 
         string n_pre = prefix;
-        core_of_auto_complete(curr, n_pre, op);
+        autocompleteRecUtil(curr, n_pre, op);
 
         return;
     }
 
-    // END autocomplete
 
     void populateTrie(vector<string> &path_variable) /// priyank  done    moved
     {
