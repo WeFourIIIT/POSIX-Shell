@@ -325,6 +325,12 @@ void handleRecording(string recordFile, string command) {
 
 void parseInputString(string command)
 {
+    if(command.find("~") != string::npos) {
+        int idx = command.find("~");
+        string leftPart = command.substr(0, idx);
+        string rightPart = command.substr(idx + 1);
+        command = leftPart + getEnvVariable("HOME") + rightPart;
+    }
     vector<string> splittedCommand = splitCommand(command, " ");
     if (command.find('>') != string::npos)
     {
@@ -466,11 +472,6 @@ void parseInputString(string command)
         {
             string modifiedCommand = "";
             splittedCommand[0] = aliasUnorderedMap[splittedCommand[0]];
-            // for (int i = 0; i < splittedCommand.size(); i++)
-            // {
-            //     modifiedCommand += splittedCommand[i] + " ";
-            // }
-            // modifiedCommand.pop_back();
             parseInputString(splittedCommand[0]);
         }
         else
@@ -478,12 +479,9 @@ void parseInputString(string command)
             // cat, ls, mkdir, touch, nano, cd, pwd, whoami
             if (splittedCommand[0] == "cd")
             {
-                if (splittedCommand[1] == "~")
-                    splittedCommand[1] = getEnvVariable("HOME");
                 if (chdir(splittedCommand[1].c_str()) != 0)
                 {
-                    cout << endl
-                         << "Invalid path" << endl;
+                    cout<<endl<<"Invalid path" << endl;
                 }
             }
             else
