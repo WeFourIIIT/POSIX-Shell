@@ -8,7 +8,8 @@
 
 using namespace std;
 
-int main() {
+int main()
+{
     signal(SIGINT, exitShell);
     initialise();
     return 0;

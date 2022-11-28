@@ -1,10 +1,9 @@
-#include <bits/stdc++.h>
-
-using namespace std;
-
+#include <string>
 void initialiseTerminal(void);
-string getEnvVariable(void);
+std::string getEnvVariable(std::string);
 void clearScreen(void);
 void initialise(void);
 void exitShell(int);
-void parseInputString(string);
+void parseInputString(std::string);
+void handleRecordingOutput(std::string, std::string);
+void handleRecordingNoOutput(std::string, std::string);

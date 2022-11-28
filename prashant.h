@@ -1,4 +1,4 @@
-#include <bits/stdc++.h>
-using namespace std;
-pair<string, string> aliasHandle(string cmd);
-void pipeCmd(string cmd);
+#include <string>
+
+std::pair<std::string, std::string> aliasHandle(std::string cmd);
+void pipeCmd(std::string cmd);

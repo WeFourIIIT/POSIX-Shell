@@ -1,5 +1,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
+#include <vector>
+#include <string>
+#include <iostream>
 
 #include "prashant.h"
 #include "ujjwal.h"
@@ -8,7 +11,7 @@ using namespace std;
 void handlePipes(string cmd)
 {
     string temp = "";
-    vector<string> individualCommand;
+    std::vector<std::string> individualCommand;
     for (int i = 0; i < (int)cmd.size(); i++)
     {
         if (cmd[i] != '|')
@@ -43,38 +46,42 @@ void handlePipes(string cmd)
     // for reading end fd[0]    //1B at a time
     // sender(writring end)--> receiver(reading end)
 
-    int fd[2], receiveData;
+    int fd[2], receiveData = 0;
     pid_t newProcess;
-
-    for (int i = 0; !individualCommand[i].empty(); i++)
+    if (getEnvVariable("HOME").empty())
     {
-        pipe(fd);
-        newProcess = fork();
-        if (newProcess > 0) // parent process
+        for (int i = 0; !individualCommand[i].empty(); i++)
         {
-            // wait is an inbuilt command in the Linux shell.
-            // It waits for the process to change its state i.e.
-            // it waits for any running process to complete and returns the exit status.
-            wait(NULL);
-            close(fd[1]);
-            receiveData = fd[0];
-        }
-        else if (newProcess == 0) // child process
-        {
-            dup2(receiveData, 0);
-            if (individualCommand[i + 1] != "\0" && (!individualCommand[i + 1].empty()))
+            pipe(fd);
+            newProcess = fork();
+            if (newProcess > 0) // parent process
             {
-                dup2(fd[1], 1);
+                // wait is an inbuilt command in the Linux shell.
+                // It waits for the process to change its state i.e.
+                // it waits for any running process to complete and returns the exit status.
+                wait(NULL);
+                close(fd[1]);
+                receiveData = fd[0];
             }
-            close(fd[0]);
-            parseInputString(individualCommand[i]);
-            exit(EXIT_SUCCESS);
-        }
-        else if (newProcess < 0)
-        {
-            perror("Fork Failed");
+            else if (newProcess == 0) // child process
+            {
+                dup2(receiveData, 0);
+                if (individualCommand[i + 1] != "\0" && (!individualCommand[i + 1].empty()))
+                {
+                    dup2(fd[1], 1);
+                }
+                close(fd[0]);
+                parseInputString(individualCommand[i]);
+                // cout << endl;
+                exit(EXIT_SUCCESS);
+            }
+            else if (newProcess < 0)
+            {
+                perror("Fork Failed");
+            }
         }
     }
+    cout << endl;
     int procId = fork();
     if (procId == 0)
     {
@@ -86,24 +93,14 @@ void handlePipes(string cmd)
         return;
     }
 }
-
-void checkPipes(string cmd)
-{
-    // check is pipe exist or not in command
-    if (cmd.find("|"))
-    {
-        handlePipes(cmd);
-    }
-}
-
 void pipeCmd(string cmd)
 {
-    checkPipes(cmd);
+    handlePipes(cmd);
 }
 
 pair<string, string> aliasHandle(string cmd)
 {
-    vector<string> arguments;
+    std::vector<std::string> arguments;
     string temp = "";
     int flag = 1;
     for (int i = 0; i < (int)cmd.size(); i++)
@@ -136,9 +133,9 @@ pair<string, string> aliasHandle(string cmd)
         }
     }
     arguments.push_back(temp);
-    string key = arguments[1];
-    string value = arguments[2];
-    pair<string, string> retVal;
+    std::string key = arguments[1];
+    std::string value = arguments[2];
+    std::pair<std::string, std::string> retVal;
     retVal.first = key;
     retVal.second = value;
     return retVal;

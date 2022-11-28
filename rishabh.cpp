@@ -1,20 +1,24 @@
 #include <unistd.h>
+#include <vector>
+#include <string>
+#include <iostream>
 #include "rishabh.h"
- 
-void alarmMessage(vector<string> mymsg, int sec) // if (args[0] == "alarm") alarmMessage(args, stoi(args[1]));
+#include "ujjwal.h"
+void alarmMessage(std::vector<std::string> mymsg, int sec, std::string &recordFilePath) // if (args[0] == "alarm") alarmMessage(args, stoi(args[1]));
 {
     int mysize;
     mysize = mymsg.size();
     if (mysize < 3)
     {
-        cout<<endl<<"Invalid alarm";
-        cout<<endl;
+        std::cout << std::endl
+                  << "Invalid alarm";
+        std::cout << std::endl;
         return;
     }
     else
     {
 
-        string sms;
+        std::string sms;
         sms = "";
 
         int i;
@@ -27,33 +31,28 @@ void alarmMessage(vector<string> mymsg, int sec) // if (args[0] == "alarm") alar
             i = i + 1;
         }
         pid_t pid = fork();
-        if (pid == 0) {
+        if (pid == 0)
+        {
             sleep(sec);
-            cout<<sms;
-            cout<<endl;
-            
-            ch=10; 
- 
-        if(ch==10) 
-        { 
- exit(EXIT_SUCCESS);
-           // break; 
- 
-        } 
-        }else{
+            std::cout << sms;
+            handleRecordingOutput(recordFilePath, sms);
+            putchar(10);
+            exit(EXIT_SUCCESS);
+        }
+        else
+        {
             return;
         }
     }
 }
 
-void fileOpen(const char *filename) {
+void fileOpen(const char *filename)
+{
     pid_t pid = fork();
-    if (pid == 0) {
+    if (pid == 0)
+    {
         close(2);
-        execlp("open", "open", filename, NULL);
+        execlp("/usr/bin/open", "open", filename, NULL);
         exit(0);
     }
 }
-
-
-
