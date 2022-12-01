@@ -1,44 +1,5 @@
 echo $HOME
-mkdir test1
-rm -rf test
-rm -rf POSIX-Shell/test1
-cd POSIX-Shell
-which history
-echo Ujjwal > test
-echo Prashant >> test
-echo Kutta > test
-cat file1.txt | sort | uniq > save.txt
-cat file1.txt | head -8 | sort | tail -5 | echo > ujju.txt
-cat file1.txt | head -8 | sort | tail -5
-export COLLEGE=IIIT
-echo $COLLEGE
-export -p
-alarm 2 Rishabh
-open Makefile
-cat record.txt
-echo $PATH
-record start
-cat Makefile
-record stop
-ls -al
 pwd
-lsl
-lllds
-kdjsbg
-cat Ujjwal
-fkjbkds
-echo $?
-mkdir
-which nano
-alarm 3 bfkdsab
-quir
-kfbsdkf
-alarm 3 fubai
-alarm 1 fbak
-alarm 2 fakbdgbsdvk
-echo $HELLO
-echo Hello
-cd ..
-echo Ujjwal
+ls -al
 history
 quit
